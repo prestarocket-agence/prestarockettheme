@@ -132,7 +132,7 @@ class prestarocketclassic extends Module
                 'title' => $this->l('Banner configuration')
             ],
             'input' => [
-                [
+                1 => [
                     'type' => 'file',
                     'label' => $this->l('Logo SVG'),
                     'name' => 'ROCKETCLASSIC_SVG',
@@ -143,6 +143,19 @@ class prestarocketclassic extends Module
                 'title' => $this->l('Save')
             ]
         ];
+
+        if (file_exists($this->imgUploadFolder . 'logo.svg')) {
+            $source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
+            $source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+
+            $fieldsForm[0]['form']['input'][0] = [
+                'type' => 'html',
+                'name' => 'ROCKETCLASSIC_SVG_PREVIEW',
+                'html_content' => '<img src="' . $source_file . '" alt="ROCKETCLASSIC_SVG_PREVIEW">'
+            ];
+        }
+
+        sort($fieldsForm[0]['form']['input']);
 
         $helper = new HelperForm();
         $helper->module = $this;
