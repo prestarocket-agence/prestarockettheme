@@ -16,7 +16,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class prestarocketclassic extends Module
+class prestarockettheme extends Module
 {
     protected $html = '';
 
@@ -24,7 +24,7 @@ class prestarocketclassic extends Module
 
     public function __construct()
     {
-        $this->name = 'prestarocketclassic';
+        $this->name = 'prestarockettheme';
         $this->author = 'Prestarocket';
         $this->version = '1.0.0';
         $this->need_instance = 1;
