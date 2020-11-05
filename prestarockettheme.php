@@ -87,7 +87,7 @@ class prestarockettheme extends Module
     public function hookActionFrontControllerSetVariables()
     {
         $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
-        
+
         return array(
             'logo_svg' => $source_file
         );
