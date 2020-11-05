@@ -137,6 +137,24 @@ class prestarockettheme extends Module
                     'label' => $this->l('Logo SVG'),
                     'name' => 'ROCKETCLASSIC_SVG',
                     'required' => true
+                ],
+                'width' => [
+                    'type' => 'text',
+                    'label' => $this->l('Image width'),
+                    'name' => 'ROCKETCLASSIC_SVG_WIDTH',
+                    'required' => true
+                ],
+                'height' => [
+                    'type' => 'text',
+                    'label' => $this->l('Image height'),
+                    'name' => 'ROCKETCLASSIC_SVG_HEIGHT',
+                    'required' => true
+                ],
+                'logo' => [
+                    'type' => 'text',
+                    'label' => $this->l('Logo\'s pathing'),
+                    'name' => 'ROCKETCLASSIC_SVG_LOGO',
+                    'required' => true
                 ]
             ],
             'submit' => [
@@ -180,7 +198,11 @@ class prestarockettheme extends Module
 
     protected function getConfigFieldsValues()
     {
-        return [];
+        return [
+            'ROCKETCLASSIC_SVG_WIDTH' => Tools::getValue('ROCKETCLASSIC_SVG_WIDTH', Configuration::get('ROCKETCLASSIC_SVG_WIDTH')),
+            'ROCKETCLASSIC_SVG_HEIGHT' => Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT', Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')),
+            'ROCKETCLASSIC_SVG_LOGO' => Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO'))
+        ];
     }
 
     private function getUploadErrorMessage($code)
