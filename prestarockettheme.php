@@ -118,9 +118,15 @@ class prestarockettheme extends Module
             } else if (!move_uploaded_file($_FILES['ROCKETCLASSIC_SVG']['tmp_name'], $this->imgUploadFolder . 'logo.svg')) {
                 $this->errors[] = $this->l('Wrong! The file has not been uploaded.');
                 return false;
+            } else if(!ctype_digit(Configuration::get('ROCKETCLASSIC_SVG_WIDTH')) ||!ctype_digit(Configuration::get('ROCKETCLASSIC_SVG_HEIGHT'))) {
+                $this->errors[] = $this->l('Please enter a valid number');
+                return false;
             }
 
             Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
+            Configuration::updateValue('ROCKETCLASSIC_SVG_WIDTH', Tools::getValue('ROCKETCLASSIC_SVG_WIDTH'));
+            Configuration::updateValue('ROCKETCLASSIC_SVG_HEIGHT', Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT'));
+            Configuration::updateValue('ROCKETCLASSIC_SVG_LOGO', Tools::getValue('ROCKETCLASSIC_SVG_LOGO'));
             $this->html .= $this->displayConfirmation($this->l('File uploaded!'));
         }
     }
