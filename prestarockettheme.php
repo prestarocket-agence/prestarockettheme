@@ -64,6 +64,8 @@ class prestarockettheme extends Module
         return parent::uninstall()
             && Configuration::deleteByName('ROCKETCLASSIC_SVG')
             && Configuration::deleteByName('ROCKETCLASSIC_SVG_LOGO')
+            && Configuration::deleteByName('ROCKETCLASSIC_SVG_TITLE')
+            && Configuration::deleteByName('ROCKETCLASSIC_SVG_DESCRIPTION')
             && $this->uninstallDir();
     }
 
