@@ -86,20 +86,22 @@ class prestarockettheme extends Module
 
     public function hookActionFrontControllerSetVariables()
     {
-        $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+        if (Configuration::get('ROCKETCLASSIC_SVG_LOGO')) {
+            $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
-        $xml = file_get_contents($source_file);
-        $xmlget = simplexml_load_string($xml);
-        $xmlattributes = $xmlget->attributes();
-        return array(
-            'logo_svg' => $source_file,
-            'size_svg' => array(
-                'width' => (string) $xmlattributes->width,
-                'height' => (string) $xmlattributes->height
-            ),
-            'title_svg' => Configuration::get('ROCKETCLASSIC_SVG_TITLE'),
-            'description_svg' => Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')
-        );
+            $xml = file_get_contents($source_file);
+            $xmlget = simplexml_load_string($xml);
+            $xmlattributes = $xmlget->attributes();
+            return array(
+                'logo_svg' => $source_file,
+                'size_svg' => array(
+                    'width' => (string)$xmlattributes->width,
+                    'height' => (string)$xmlattributes->height
+                ),
+                'title_svg' => Configuration::get('ROCKETCLASSIC_SVG_TITLE'),
+                'description_svg' => Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')
+            );
+        }
     }
 
     public function getContent()
