@@ -62,11 +62,9 @@ class prestarockettheme extends Module
     public function uninstall()
     {
         return parent::uninstall()
-            && $this->uninstallDir()
             && Configuration::deleteByName('ROCKETCLASSIC_SVG')
-            && Configuration::deleteByName('ROCKETCLASSIC_SVG_WIDTH')
-            && Configuration::deleteByName('ROCKETCLASSIC_SVG_HEIGHT')
-            && Configuration::deleteByName('ROCKETCLASSIC_SVG_LOGO');
+            && Configuration::deleteByName('ROCKETCLASSIC_SVG_LOGO')
+            && $this->uninstallDir();
     }
 
     protected function uninstallDir()
@@ -88,6 +86,12 @@ class prestarockettheme extends Module
     {
         $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
+        $xmlget = simplexml_load_string("/img/logo.svg");
+        $xmlattributes = $xmlget->attributes();
+        $width = (string) $xmlattributes->width;
+        $height = (string) $xmlattributes->height;
+        dump($width);
+        dump($height);
         return array(
             'logo_svg' => $source_file
         );
@@ -109,7 +113,7 @@ class prestarockettheme extends Module
             if (!isset($_FILES['ROCKETCLASSIC_SVG'])) {
                 $this->errors[] = $this->l('Wrong! There is no file uploaded.');
                 return false;
-            } else if (!ImageManager::validateUpload($_FILES['ROCKETCLASSIC_SVG'])) {
+            } else if ($_FILES['ROCKETCLASSIC_SVG']['type'] !== 'image/svg+xml') {
                 $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
                 return false;
             } else if ($_FILES['ROCKETCLASSIC_SVG']['error']) {
@@ -118,21 +122,15 @@ class prestarockettheme extends Module
             } else if (!move_uploaded_file($_FILES['ROCKETCLASSIC_SVG']['tmp_name'], $this->imgUploadFolder . 'logo.svg')) {
                 $this->errors[] = $this->l('Wrong! The file has not been uploaded.');
                 return false;
-            } else if(!ctype_digit(Tools::getValue('ROCKETCLASSIC_SVG_WIDTH', Configuration::get('ROCKETCLASSIC_SVG_WIDTH')))
-                || !ctype_digit(Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT', Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')))) {
-                $this->errors[] = $this->l('Please enter a valid number');
-                return false;
-            } else if (!Configuration::get('ROCKETCLASSIC_SVG_WIDTH')
-                || !Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')
-                || !Configuration::get('ROCKETCLASSIC_SVG_LOGO')) {
+            } else if (empty(Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO')))) {
                 $this->errors[] = $this->l('Please enter a value');
                 return false;
             }
 
             Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
-            Configuration::updateValue('ROCKETCLASSIC_SVG_WIDTH', Tools::getValue('ROCKETCLASSIC_SVG_WIDTH'));
-            Configuration::updateValue('ROCKETCLASSIC_SVG_HEIGHT', Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT'));
             Configuration::updateValue('ROCKETCLASSIC_SVG_LOGO', Tools::getValue('ROCKETCLASSIC_SVG_LOGO'));
+            Configuration::updateValue('ROCKETCLASSIC_SVG_TITLE', Tools::getValue('ROCKETCLASSIC_SVG_TITLE'));
+            Configuration::updateValue('ROCKETCLASSIC_SVG_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_SVG_DESCRIPTION'));
             $this->html .= $this->displayConfirmation($this->l('File uploaded!'));
         }
     }
@@ -150,22 +148,22 @@ class prestarockettheme extends Module
                     'name' => 'ROCKETCLASSIC_SVG',
                     'required' => true
                 ],
-                'width' => [
-                    'type' => 'text',
-                    'label' => $this->l('Image width'),
-                    'name' => 'ROCKETCLASSIC_SVG_WIDTH',
-                    'required' => true
-                ],
-                'height' => [
-                    'type' => 'text',
-                    'label' => $this->l('Image height'),
-                    'name' => 'ROCKETCLASSIC_SVG_HEIGHT',
-                    'required' => true
-                ],
                 'logo' => [
                     'type' => 'text',
                     'label' => $this->l('Logo\'s link'),
                     'name' => 'ROCKETCLASSIC_SVG_LOGO',
+                    'required' => true
+                ],
+                'title' => [
+                    'type' => 'text',
+                    'label' => $this->l('Logo\'s Title'),
+                    'name' => 'ROCKETCLASSIC_SVG_TITLE',
+                    'required' => true
+                ],
+                'description' => [
+                    'type' => 'text',
+                    'label' => $this->l('Logo\' Description'),
+                    'name' => 'ROCKETCLASSIC_SVG_DESCRIPTION',
                     'required' => true
                 ]
             ],
@@ -211,9 +209,9 @@ class prestarockettheme extends Module
     protected function getConfigFieldsValues()
     {
         return [
-            'ROCKETCLASSIC_SVG_WIDTH' => Tools::getValue('ROCKETCLASSIC_SVG_WIDTH', Configuration::get('ROCKETCLASSIC_SVG_WIDTH')),
-            'ROCKETCLASSIC_SVG_HEIGHT' => Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT', Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')),
-            'ROCKETCLASSIC_SVG_LOGO' => Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO'))
+            'ROCKETCLASSIC_SVG_LOGO' => Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO')),
+            'ROCKETCLASSIC_SVG_TITLE' => Tools::getValue('ROCKETCLASSIC_SVG_TITLE', Configuration::get('ROCKETCLASSIC_SVG_TITLE')),
+            'ROCKETCLASSIC_SVG_DESCRIPTION' => Tools::getValue('ROCKETCLASSIC_SVG_DESCRIPTION', Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION'))
         ];
     }
 
