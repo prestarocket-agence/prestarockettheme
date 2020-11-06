@@ -86,14 +86,15 @@ class prestarockettheme extends Module
     {
         $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
-        $xmlget = simplexml_load_string("/img/logo.svg");
+        $xml = file_get_contents($source_file);
+        $xmlget = simplexml_load_string($xml);
         $xmlattributes = $xmlget->attributes();
-        $width = (string) $xmlattributes->width;
-        $height = (string) $xmlattributes->height;
-        dump($width);
-        dump($height);
         return array(
-            'logo_svg' => $source_file
+            'logo_svg' => $source_file,
+            'size_svg' => array(
+                'width' => (string) $xmlattributes->width,
+                'height' => (string) $xmlattributes->height
+            )
         );
     }
 
@@ -122,7 +123,9 @@ class prestarockettheme extends Module
             } else if (!move_uploaded_file($_FILES['ROCKETCLASSIC_SVG']['tmp_name'], $this->imgUploadFolder . 'logo.svg')) {
                 $this->errors[] = $this->l('Wrong! The file has not been uploaded.');
                 return false;
-            } else if (empty(Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO')))) {
+            } else if (empty(Tools::getValue('ROCKETCLASSIC_SVG_LOGO', Configuration::get('ROCKETCLASSIC_SVG_LOGO')))
+                || empty(Tools::getValue('ROCKETCLASSIC_SVG_TITLE', Configuration::get('ROCKETCLASSIC_SVG_TITLE')))
+                || empty(Tools::getValue('ROCKETCLASSIC_SVG_DESCRIPTION', Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')))) {
                 $this->errors[] = $this->l('Please enter a value');
                 return false;
             }
