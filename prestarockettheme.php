@@ -95,8 +95,8 @@ class prestarockettheme extends Module
                 'width' => (string) $xmlattributes->width,
                 'height' => (string) $xmlattributes->height
             ),
-            'title' => Configuration::get('ROCKETCLASSIC_SVG_TITLE'),
-            'description' => Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')
+            'title_svg' => Configuration::get('ROCKETCLASSIC_SVG_TITLE'),
+            'description_svg' => Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')
         );
     }
 
