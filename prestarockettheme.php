@@ -150,17 +150,24 @@ class prestarockettheme extends Module
             'legend' => [
                 'title' => $this->l('Banner configuration')
             ],
+            'tabs' => array(
+                'svg' => $this->l('Image SVG'),
+                'account' => $this->l('my account')
+            ),
             'input' => [
                 1 => [
                     'type' => 'file',
                     'label' => $this->l('Logo SVG'),
                     'name' => 'ROCKETCLASSIC_SVG',
+                    'tab' => 'svg',
                     'required' => true
                 ],
             ],
             'submit' => [
-                'title' => $this->l('Save')
+                'title' => $this->l('Save'),
+                'tab' => 'svg'
             ]
+
         ];
 
         if (file_exists($this->imgUploadFolder . 'logo.svg')) {
