@@ -19,6 +19,8 @@ if (!defined('_PS_VERSION_')) {
 class prestarockettheme extends Module
 {
     protected $html = '';
+    protected $xmlwidth = false;
+    protected $xmlheigth = false;
 
     protected $errors = [];
 
@@ -89,14 +91,11 @@ class prestarockettheme extends Module
         if (Configuration::get('ROCKETCLASSIC_SVG_LOGO')) {
             $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
-            $xml = file_get_contents($source_file);
-            $xmlget = simplexml_load_string($xml);
-            $xmlattributes = $xmlget->attributes();
             return array(
                 'logo_svg' => $source_file,
                 'size_svg' => array(
-                    'width' => (string)$xmlattributes->width,
-                    'height' => (string)$xmlattributes->height
+                    'width' => (string)$this->xmlwidth,
+                    'height' => (string)$this->xmlheigth,
                 ),
                 'title_svg' => Configuration::get('ROCKETCLASSIC_SVG_TITLE'),
                 'description_svg' => Configuration::get('ROCKETCLASSIC_SVG_DESCRIPTION')
@@ -136,12 +135,29 @@ class prestarockettheme extends Module
                 return false;
             }
 
-            Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
-            Configuration::updateValue('ROCKETCLASSIC_SVG_LOGO', Tools::getValue('ROCKETCLASSIC_SVG_LOGO'));
-            Configuration::updateValue('ROCKETCLASSIC_SVG_TITLE', Tools::getValue('ROCKETCLASSIC_SVG_TITLE'));
-            Configuration::updateValue('ROCKETCLASSIC_SVG_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_SVG_DESCRIPTION'));
+            $this->updateAll();
+            $this->getImageSize();
             $this->html .= $this->displayConfirmation($this->l('File uploaded!'));
         }
+    }
+
+    protected function  updateAll()
+    {
+        Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
+        Configuration::updateValue('ROCKETCLASSIC_SVG_LOGO', Tools::getValue('ROCKETCLASSIC_SVG_LOGO'));
+        Configuration::updateValue('ROCKETCLASSIC_SVG_TITLE', Tools::getValue('ROCKETCLASSIC_SVG_TITLE'));
+        Configuration::updateValue('ROCKETCLASSIC_SVG_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_SVG_DESCRIPTION'));
+    }
+
+    public function getImageSize()
+    {
+        $source_file = Configuration::get('ROCKETCLASSIC_SVG_LOGO') . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+
+        $xml = file_get_contents($source_file);
+        $xmlget = simplexml_load_string($xml);
+        $xmlattributes = $xmlget->attributes();
+        $this->xmlwidth = $xmlattributes->width;
+        $this->xmlheigth = $xmlattributes->height;
     }
 
     protected function renderForm()
