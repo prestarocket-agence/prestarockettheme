@@ -63,6 +63,8 @@ class prestarockettheme extends Module
     {
         return parent::uninstall()
             && Configuration::deleteByName('ROCKETCLASSIC_SVG')
+            && Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_TITLE')
+            && Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')
             && $this->uninstallDir();
     }
 
@@ -85,10 +87,16 @@ class prestarockettheme extends Module
         $source_file = $svg_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
         return array(
-            'logo_svg' => $source_file,
-            'size_svg' => array(
-                'width' => (string)Tools::getValue('ROCKETCLASSIC_SVG_WIDTH', Configuration::get('ROCKETCLASSIC_SVG_WIDTH')),
-                'height' => (string)Tools::getValue('ROCKETCLASSIC_VG_HEIGHT', Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')),
+            'svg' => array(
+                'logo_svg' => $source_file,
+                'size_svg' => array(
+                    'width' => (string)Tools::getValue('ROCKETCLASSIC_SVG_WIDTH', Configuration::get('ROCKETCLASSIC_SVG_WIDTH')),
+                    'height' => (string)Tools::getValue('ROCKETCLASSIC_SVG_HEIGHT', Configuration::get('ROCKETCLASSIC_SVG_HEIGHT')),
+                ),
+            ),
+            'account' => array(
+                'title_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
+                'description_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
             ),
         );
     }
@@ -106,17 +114,9 @@ class prestarockettheme extends Module
     protected function postProcess()
     {
         if (Tools::isSubmit('submit' . $this->name)) {
-            if (!isset($_FILES['ROCKETCLASSIC_SVG'])) {
-                $this->errors[] = $this->l('Wrong! There is no file uploaded.');
+            if (!$this->svgHandler()) {
                 return false;
-            } else if ($_FILES['ROCKETCLASSIC_SVG']['type'] !== 'image/svg+xml') {
-                $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
-                return false;
-            } else if ($_FILES['ROCKETCLASSIC_SVG']['error']) {
-                $this->errors[] = $this->getUploadErrorMessage($_FILES['ROCKETCLASSIC_SVG']['error']);
-                return false;
-            } else if (!move_uploaded_file($_FILES['ROCKETCLASSIC_SVG']['tmp_name'], $this->imgUploadFolder . 'logo.svg')) {
-                $this->errors[] = $this->l('Wrong! The file has not been uploaded.');
+            } else if (!$this->accoutnHandler()) {
                 return false;
             }
             $this->updateAll();
@@ -126,9 +126,45 @@ class prestarockettheme extends Module
         return true;
     }
 
+    protected function accoutnHandler()
+    {
+        if (!isset($_FILES['ROCKETCLASSIC_ACCOUNT'])) {
+            $this->errors[] = $this->l('Wrong! There is no file uploaded.');
+            return false;
+        } else if (empty(Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')))
+            || empty(Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')))) {
+            $this->errors[] = $this->l('Please enter a sentence');
+            return false;
+        } else if ($_FILES['ROCKETCLASSIC_ACCOUNT']['type'] !== 'image/png+jpg') {
+            $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
+            return false;
+        }
+        return true;
+    }
+
+    protected function svgHandler()
+    {
+        if (!isset($_FILES['ROCKETCLASSIC_SVG'])) {
+            $this->errors[] = $this->l('Wrong! There is no file uploaded.');
+            return false;
+        } else if ($_FILES['ROCKETCLASSIC_SVG']['type'] !== 'image/svg+xml') {
+            $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
+            return false;
+        } else if ($_FILES['ROCKETCLASSIC_SVG']['error']) {
+            $this->errors[] = $this->getUploadErrorMessage($_FILES['ROCKETCLASSIC_SVG']['error']);
+            return false;
+        } else if (!move_uploaded_file($_FILES['ROCKETCLASSIC_SVG']['tmp_name'], $this->imgUploadFolder . 'logo.svg')) {
+            $this->errors[] = $this->l('Wrong! The file has not been uploaded.');
+            return false;
+        }
+        return true;
+    }
+
     protected function  updateAll()
     {
         Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
+        Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_TITLE', Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE'));
+        Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION'));
     }
 
     public function updateImageSize()
@@ -191,13 +227,13 @@ class prestarockettheme extends Module
         ];
 
         if (file_exists($this->imgUploadFolder . 'logo.svg')) {
-            $source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
-            $source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+            $svg_source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
+            $svg_source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
             $fieldsForm[0]['form']['input'][0] = [
                 'type' => 'html',
                 'name' => 'ROCKETCLASSIC_SVG_PREVIEW',
-                'html_content' => '<img src="' . $source_file . '" alt="ROCKETCLASSIC_SVG_PREVIEW">'
+                'html_content' => '<img src="' . $svg_source_file . '" alt="ROCKETCLASSIC_SVG_PREVIEW">'
             ];
         }
 
@@ -226,7 +262,11 @@ class prestarockettheme extends Module
 
     protected function getConfigFieldsValues()
     {
-        return [];
+        return [
+            'ROCKETCLASSIC_ACCOUNT_TITLE' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
+            'ROCKETCLASSIC_ACCOUNT_DESCRIPTION' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
+
+        ];
     }
 
     private function getUploadErrorMessage($code)
