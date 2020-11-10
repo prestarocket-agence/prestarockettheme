@@ -155,19 +155,39 @@ class prestarockettheme extends Module
                 'account' => $this->l('my account')
             ),
             'input' => [
-                1 => [
+                'svg_file' => [
                     'type' => 'file',
                     'label' => $this->l('Logo SVG'),
                     'name' => 'ROCKETCLASSIC_SVG',
                     'tab' => 'svg',
                     'required' => true
                 ],
+                'account_image' => [
+                    'type' => 'file',
+                    'label' => $this->l('Account Picture'),
+                    'name' => 'ROCKETCLASSIC_ACCOUNT',
+                    'tab' => 'account',
+                    'required' => true
+                ],
+                'account_title' => array(
+                    'type' => 'text',
+                    'label' => $this->l('Account title'),
+                    'name' => 'ROCKETCLASSIC_ACCOUNT_TITLE',
+                    'tab' => 'account',
+                    'required' => true
+                ),
+                'account_description' => array(
+                    'type' => 'text',
+                    'label' => $this->l('Account description'),
+                    'name' => 'ROCKETCLASSIC_ACCOUNT_DESCRIPTION',
+                    'tab' => 'account',
+                    'required' => true
+                ),
             ],
             'submit' => [
                 'title' => $this->l('Save'),
                 'tab' => 'svg'
-            ]
-
+            ],
         ];
 
         if (file_exists($this->imgUploadFolder . 'logo.svg')) {
