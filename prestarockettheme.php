@@ -64,13 +64,16 @@ class prestarockettheme extends Module
         Configuration::deleteByName('ROCKETCLASSIC_SVG');
         Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_TITLE');
         Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_DESCRIPTION');
+        Configuration::deleteByName('ROCKETCLASSIC_CATEGORY');
+        Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT');
 
         return parent::uninstall();
     }
 
     public function hookActionFrontControllerSetVariables()
     {
-        $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
+        $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
+        $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
         $source_file = $svg_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
         return array(
@@ -84,6 +87,10 @@ class prestarockettheme extends Module
             'account' => array(
                 'title_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
                 'description_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
+                'image_account' => $account_link,
+            ),
+            'category' => array(
+                'category_switch' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY')),
             ),
         );
     }
@@ -154,7 +161,7 @@ class prestarockettheme extends Module
 
     public function updateImageSize()
     {
-        $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
+        $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
 
         $xml = file_get_contents($svg_link);
         $xmlget = simplexml_load_string($xml);
@@ -214,7 +221,7 @@ class prestarockettheme extends Module
                     'label' => $this->l('Show the sub_categories'),
                     'name' => 'ROCKETCLASSIC_CATEGORY',
                     'desc' => $this->l('Please select if you want to show the sub-categories'),
-                    'required' => true,
+                    'required' => false,
                     'tab' => 'category',
                     'values' => array(
                         array(
@@ -236,8 +243,8 @@ class prestarockettheme extends Module
             ],
         ];
 
-        if (file_exists($this->imgUploadFolder . 'logo.svg')) {
-            $svg_source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . 'logo.svg'));
+        if (isset($_FILES['ROCKETCLASSIC_SVG'])) {
+            $svg_source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
             $svg_source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
             $fieldsForm[0]['form']['input'][0] = [
