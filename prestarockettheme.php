@@ -61,24 +61,11 @@ class prestarockettheme extends Module
 
     public function uninstall()
     {
-        return parent::uninstall()
-            && Configuration::deleteByName('ROCKETCLASSIC_SVG')
-            && Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_TITLE')
-            && Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')
-            && $this->uninstallDir();
-    }
+        Configuration::deleteByName('ROCKETCLASSIC_SVG');
+        Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_TITLE');
+        Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_DESCRIPTION');
 
-    protected function uninstallDir()
-    {
-        if (file_exists($this->imgUploadFolder)) {
-            foreach (scandir($this->imgUploadFolder) as $file) {
-                if (!in_array($file, ['.', '..'])) {
-                    unlink($file);
-                }
-            }
-            unlink($this->imgUploadFolder);
-        }
-        return true;
+        return parent::uninstall();
     }
 
     public function hookActionFrontControllerSetVariables()
@@ -128,16 +115,11 @@ class prestarockettheme extends Module
 
     protected function accoutnHandler()
     {
-        if (!isset($_FILES['ROCKETCLASSIC_ACCOUNT'])) {
-            $this->errors[] = $this->l('Wrong! There is no file uploaded.');
-            return false;
-        } else if (empty(Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')))
-            || empty(Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')))) {
-            $this->errors[] = $this->l('Please enter a sentence');
-            return false;
-        } else if ($_FILES['ROCKETCLASSIC_ACCOUNT']['type'] !== 'image/png+jpg') {
-            $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
-            return false;
+        if ($_FILES['ROCKETCLASSIC_ACCOUNT']['error'] == 0) {
+            if (ImageManager::validateUpload($_FILES['ROCKETCLASSIC_ACCOUNT'], 4000000)) {
+                $this->errors[] = $this->l('Wrong! Uploaded file is not a valid file.');
+                return false;
+            }
         }
         return true;
     }
@@ -163,6 +145,8 @@ class prestarockettheme extends Module
     protected function  updateAll()
     {
         Configuration::updateValue('PRESTAROCKETCLASSIC_UPLOAD_DATE', date('YmdHis'));
+        Configuration::updateValue('ROCKETCLASSIC_SVG', Tools::getValue('ROCKETCLASSIC_SVG'));
+        Configuration::updateValue('ROCKETCLASSIC_ACCOUNT', Tools::getValue('ROCKETCLASSIC_ACCOUNT'));
         Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_TITLE', Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE'));
         Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION'));
     }
@@ -188,7 +172,8 @@ class prestarockettheme extends Module
             ],
             'tabs' => array(
                 'svg' => $this->l('Image SVG'),
-                'account' => $this->l('my account')
+                'account' => $this->l('my account'),
+                'category' => $this->l('categories')
             ),
             'input' => [
                 'svg_file' => [
@@ -203,21 +188,25 @@ class prestarockettheme extends Module
                     'label' => $this->l('Account Picture'),
                     'name' => 'ROCKETCLASSIC_ACCOUNT',
                     'tab' => 'account',
-                    'required' => true
+                    'required' => false
                 ],
                 'account_title' => array(
                     'type' => 'text',
                     'label' => $this->l('Account title'),
                     'name' => 'ROCKETCLASSIC_ACCOUNT_TITLE',
                     'tab' => 'account',
-                    'required' => true
+                    'required' => false
                 ),
                 'account_description' => array(
-                    'type' => 'text',
-                    'label' => $this->l('Account description'),
+                    'type' => 'textarea',
+                    'label' => $this->trans('Description', [], 'Modules.rocketCustomtext.Admin'),
                     'name' => 'ROCKETCLASSIC_ACCOUNT_DESCRIPTION',
+                    'cols' => 40,
+                    'rows' => 10,
                     'tab' => 'account',
-                    'required' => true
+                    'class' => 'rte',
+                    'autoload_rte' => true,
+                    'required' => false
                 ),
             ],
             'submit' => [
@@ -263,6 +252,8 @@ class prestarockettheme extends Module
     protected function getConfigFieldsValues()
     {
         return [
+            'ROCKETCLASSIC_SVG' => Tools::getValue('ROCKETCLASSIC_SVG', Configuration::get('ROCKETCLASSIC_SVG')),
+            'ROCKETCLASSIC_ACCOUNT' => Tools::getValue('ROCKETCLASSIC_ACCOUNT', Configuration::get('ROCKETCLASSIC_ACCOUNT')),
             'ROCKETCLASSIC_ACCOUNT_TITLE' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
             'ROCKETCLASSIC_ACCOUNT_DESCRIPTION' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
 
