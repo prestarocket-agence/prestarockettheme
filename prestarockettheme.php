@@ -73,10 +73,14 @@ class prestarockettheme extends Module
     public function hookActionFrontControllerSetVariables()
     {
         $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
-        $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
+        if (isset($_FILES['ROCKETCLASSIC_ACCOUNT'])) {
+            $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
+        } else {
+            $account_link = '';
+        }
         $source_file = $svg_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
 
-        return array(
+        $test = array(
             'svg' => array(
                 'logo_svg' => $source_file,
                 'size_svg' => array(
@@ -93,6 +97,8 @@ class prestarockettheme extends Module
                 'category_switch' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY')),
             ),
         );
+        dump($test);
+        return true;
     }
 
     public function getContent()
