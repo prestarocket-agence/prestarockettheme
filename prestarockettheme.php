@@ -66,19 +66,25 @@ class prestarockettheme extends Module
         Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT_DESCRIPTION');
         Configuration::deleteByName('ROCKETCLASSIC_CATEGORY');
         Configuration::deleteByName('ROCKETCLASSIC_ACCOUNT');
+        Configuration::deleteByName('ROCKETCLASSIC_SVG_WIDTH');
+        Configuration::deleteByName('ROCKETCLASSIC_SVG_HEIGHT');
 
         return parent::uninstall();
     }
 
     public function hookActionFrontControllerSetVariables()
     {
-        $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
-        if (isset($_FILES['ROCKETCLASSIC_ACCOUNT'])) {
-            $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
-        } else {
-            $account_link = '';
+        if (Configuration::get('ROCKETCLASSIC_SVG')) {
+            $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
+            $source_file = $svg_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
         }
-        $source_file = $svg_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+        if (Configuration::get('ROCKETCLASSIC_ACCOUNT')) {
+            $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
+            $account_file = $account_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+        } else {
+            $account_file = '';
+            $source_file = '';
+        }
 
         $test = array(
             'svg' => array(
@@ -91,7 +97,7 @@ class prestarockettheme extends Module
             'account' => array(
                 'title_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
                 'description_account' => (string)Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
-                'image_account' => $account_link,
+                'image_account' => $account_file,
             ),
             'category' => array(
                 'category_switch' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY')),
