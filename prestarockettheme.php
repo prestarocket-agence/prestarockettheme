@@ -149,6 +149,7 @@ class prestarockettheme extends Module
         Configuration::updateValue('ROCKETCLASSIC_ACCOUNT', Tools::getValue('ROCKETCLASSIC_ACCOUNT'));
         Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_TITLE', Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE'));
         Configuration::updateValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION'));
+        Configuration::updateValue('ROCKETCLASSIC_CATEGORY', Tools::getValue('ROCKETCLASSIC_CATEGORY'));
     }
 
     public function updateImageSize()
@@ -208,6 +209,26 @@ class prestarockettheme extends Module
                     'autoload_rte' => true,
                     'required' => false
                 ),
+                'category_switch' => array(
+                    'type' => 'switch',
+                    'label' => $this->l('Show the sub_categories'),
+                    'name' => 'ROCKETCLASSIC_CATEGORY',
+                    'desc' => $this->l('Please select if you want to show the sub-categories'),
+                    'required' => true,
+                    'tab' => 'category',
+                    'values' => array(
+                        array(
+                            'id' => 'active_on',
+                            'value' => true,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id' => 'active_off',
+                            'value' => false,
+                            'label' => $this->l('Disabled')
+                        ),
+                    )
+                ),
             ],
             'submit' => [
                 'title' => $this->l('Save'),
@@ -222,6 +243,7 @@ class prestarockettheme extends Module
             $fieldsForm[0]['form']['input'][0] = [
                 'type' => 'html',
                 'name' => 'ROCKETCLASSIC_SVG_PREVIEW',
+                'tab' => 'svg',
                 'html_content' => '<img src="' . $svg_source_file . '" alt="ROCKETCLASSIC_SVG_PREVIEW">'
             ];
         }
@@ -256,7 +278,7 @@ class prestarockettheme extends Module
             'ROCKETCLASSIC_ACCOUNT' => Tools::getValue('ROCKETCLASSIC_ACCOUNT', Configuration::get('ROCKETCLASSIC_ACCOUNT')),
             'ROCKETCLASSIC_ACCOUNT_TITLE' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
             'ROCKETCLASSIC_ACCOUNT_DESCRIPTION' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
-
+            'ROCKETCLASSIC_CATEGORY' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY'))
         ];
     }
 
