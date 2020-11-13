@@ -86,7 +86,7 @@ class prestarockettheme extends Module
             $source_file = '';
         }
 
-        $test = array(
+        return array(
             'svg' => array(
                 'logo_svg' => $source_file,
                 'size_svg' => array(
@@ -103,8 +103,6 @@ class prestarockettheme extends Module
                 'category_switch' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY')),
             ),
         );
-        dump($test);
-        return true;
     }
 
     public function getContent()
