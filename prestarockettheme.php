@@ -267,6 +267,18 @@ class prestarockettheme extends Module
             ];
         }
 
+        if (isset($_FILES['ROCKETCLASSIC_ACCOUNT'])) {
+            $svg_source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
+            $svg_source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+
+            $fieldsForm[0]['form']['input'][1] = [
+                'type' => 'html',
+                'name' => 'ROCKETCLASSIC_ACCOUNT_PREVIEW',
+                'tab' => 'account',
+                'html_content' => '<img src="' . $svg_source_file . '" alt="ROCKETCLASSIC_ACCOUNT_PREVIEW">'
+            ];
+        }
+
         sort($fieldsForm[0]['form']['input']);
 
         $helper = new HelperForm();
