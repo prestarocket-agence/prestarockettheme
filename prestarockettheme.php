@@ -45,6 +45,7 @@ class prestarockettheme extends Module
 
     public function install()
     {
+        Configuration::updateValue('ROCKET_PRODUCT_TABS_TYPE',1);
         return parent::install()
             && $this->installDir()
             && $this->registerHook('actionFrontControllerSetVariables');
@@ -85,7 +86,7 @@ class prestarockettheme extends Module
             $account_file = $account_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
         }
 
-        return array(
+        $vars = array(
             'logo' => array(
                 'url' => $source_file,
                 'width' => Configuration::get('ROCKETCLASSIC_SVG_WIDTH'),
@@ -100,6 +101,9 @@ class prestarockettheme extends Module
                 'category_switch' => Configuration::get('ROCKETCLASSIC_CATEGORY')
             ),
         );
+        $product_page_option = $this->setFrontVarProduct();
+        $vars = array_merge($vars,$product_page_option);
+        return $vars;
     }
 
     public function getContent()
@@ -115,6 +119,10 @@ class prestarockettheme extends Module
     protected function postProcess()
     {
         if (Tools::isSubmit('submit' . $this->name)) {
+
+            $this->postProcessProduct();
+
+            //@todo refacto
             if (!$this->svgHandler()) {
                 return false;
             } else if (!$this->accoutnHandler()) {
@@ -167,6 +175,19 @@ class prestarockettheme extends Module
         Configuration::updateValue('ROCKETCLASSIC_CATEGORY', Tools::getValue('ROCKETCLASSIC_CATEGORY'));
     }
 
+    protected function postProcessProduct()
+    {
+        return Configuration::updateValue('ROCKET_PRODUCT_TABS_TYPE', Tools::getValue('ROCKET_PRODUCT_TABS_TYPE'));
+
+    }
+
+    protected function setFrontVarProduct()
+    {
+        return array(
+            'product_tabs' => Configuration::get('ROCKET_PRODUCT_TABS_TYPE')
+        );
+    }
+
     public function updateImageSize()
     {
         $svg_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
@@ -184,12 +205,13 @@ class prestarockettheme extends Module
     {
         $fieldsForm[0]['form'] = [
             'legend' => [
-                'title' => $this->l('Banner configuration')
+                'title' => $this->l('Classic rocket theme configuration')
             ],
             'tabs' => array(
                 'svg' => $this->l('Logo SVG'),
                 'account' => $this->l('my account'),
-                'category' => $this->l('categories')
+                'category' => $this->l('categories'),
+                'product' => $this->l('Product page')
             ),
             'input' => [
                 'svg_file' => [
@@ -251,6 +273,8 @@ class prestarockettheme extends Module
             ],
         ];
 
+        $fieldsForm[0]['form']['input'][] = $this->renderFormProduct();
+
         if (isset($_FILES['ROCKETCLASSIC_SVG'])) {
             $svg_source_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_SVG')));
             $svg_source_file .= '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
@@ -298,14 +322,38 @@ class prestarockettheme extends Module
         return $helper->generateForm($fieldsForm);
     }
 
+    protected function renderFormProduct()
+    {
+        $product_tabs_options = [
+            ['id_product_tab'=>'tabs','name'=>'Tabs'],
+            ['id_product_tab'=>'collapse','name'=>'Collapse'],
+            ['id_product_tab'=>'columns','name'=>'In columns']
+            ];
+        return [
+            'type' => 'select',
+            'tab' => 'product',
+            'label' => $this->l('Product tabs layout'),
+            'name' => 'ROCKET_PRODUCT_TABS_TYPE',
+            'desc' => $this->l('How to display product tabs on product page'),
+            'required' => false,
+            'options' => [
+                'query' => $product_tabs_options,
+                'id' => 'id_product_tab',
+                'name' => 'name'
+            ],
+        ];
+    }
+
     protected function getConfigFieldsValues()
     {
+
         return [
             'ROCKETCLASSIC_SVG' => Tools::getValue('ROCKETCLASSIC_SVG', Configuration::get('ROCKETCLASSIC_SVG')),
             'ROCKETCLASSIC_ACCOUNT' => Tools::getValue('ROCKETCLASSIC_ACCOUNT', Configuration::get('ROCKETCLASSIC_ACCOUNT')),
             'ROCKETCLASSIC_ACCOUNT_TITLE' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_TITLE', Configuration::get('ROCKETCLASSIC_ACCOUNT_TITLE')),
             'ROCKETCLASSIC_ACCOUNT_DESCRIPTION' => Tools::getValue('ROCKETCLASSIC_ACCOUNT_DESCRIPTION', Configuration::get('ROCKETCLASSIC_ACCOUNT_DESCRIPTION')),
-            'ROCKETCLASSIC_CATEGORY' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY'))
+            'ROCKETCLASSIC_CATEGORY' => Tools::getValue('ROCKETCLASSIC_CATEGORY', Configuration::get('ROCKETCLASSIC_CATEGORY')),
+            'ROCKET_PRODUCT_TABS_TYPE' => Tools::getValue('ROCKET_PRODUCT_TABS_TYPE', Configuration::get('ROCKET_PRODUCT_TABS_TYPE'))
         ];
     }
 
