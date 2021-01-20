@@ -77,10 +77,14 @@ class prestarockettheme extends Module
     {
         $account_file = false;
         $svg_logo_url = Configuration::get('ROCKET_LOGO_SVG');
+        $product_layout = Configuration::get('ROCKET_PRODUCT_TABS_TYPE');
 
         if (Configuration::get('ROCKETCLASSIC_ACCOUNT')) {
             $account_link = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder . Configuration::get('ROCKETCLASSIC_ACCOUNT')));
             $account_file = $account_link . '?v=' . Configuration::get('PRESTAROCKETCLASSIC_UPLOAD_DATE');
+        }
+        if(!$product_layout){
+            $product_layout = "tabs";
         }
 
         $vars = array(
@@ -97,6 +101,9 @@ class prestarockettheme extends Module
             'category' => array(
                 'category_switch' => Configuration::get('ROCKETCLASSIC_CATEGORY')
             ),
+            'product' => array(
+                'product_layout' => $product_layout
+            )
         );
         $product_page_option = $this->setFrontVarProduct();
         $vars = array_merge($vars,$product_page_option);
