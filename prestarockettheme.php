@@ -295,7 +295,7 @@ class prestarockettheme extends Module
             $this->uploadAccountFile();
             Configuration::updateValue('ROCKETTHEME_UPLOAD_DATE', time());
 
-            $this->html .= $this->displayConfirmation($this->l('File uploaded!'));
+            $this->html .= $this->displayConfirmation($this->l('Configuration saved !'));
         }
 
         return true;
@@ -305,7 +305,7 @@ class prestarockettheme extends Module
     {
         $errors_file_upload = array();
         $account_file = Tools::link_rewrite($this->context->shop->name).'-account-bg';
-        if (isset($_FILES['ROCKETTHEME_ACCOUNT_FILE'])) {
+        if (isset($_FILES['ROCKETTHEME_ACCOUNT_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error'])) {
             if (!in_array($_FILES['ROCKETTHEME_ACCOUNT_FILE']['type'], array('image/jpeg', 'image/png', 'image/webm'))) {
                 $errors_file_upload[] = $this->l('Wrong! Uploaded file is not a jpg, png or webp file.');
             } elseif ($_FILES['ROCKETTHEME_ACCOUNT_FILE']['error']) {
@@ -332,7 +332,7 @@ class prestarockettheme extends Module
     {
         $errors_svg_upload = array();
         $logo_name = Tools::link_rewrite($this->context->shop->name).'-logo.svg';
-        if (isset($_FILES['ROCKETTHEME_LOGO_SVG_FILE'])) {
+        if (isset($_FILES['ROCKETTHEME_LOGO_SVG_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error'])) {
             if ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['type']) {
                 $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
             } elseif ($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error']) {
