@@ -70,8 +70,8 @@ class prestarockettheme extends Module
         Configuration::deleteByName('ROCKETTHEME_CATEGORY');
         Configuration::deleteByName('ROCKETTHEME_PRODUCT_TABS_TYPE');
         Configuration::deleteByName('ROCKETTHEME_LOGO_SVG_FILE');
-        Configuration::deleteByName('ROCKETTHEME_LOGO_SVG_WIDTH');
-        Configuration::deleteByName('ROCKETTHEME_LOGO_SVG_HEIGHT');
+        Configuration::deleteByName('ROCKETTHEME_LOGO_SVG_FILE_WIDTH');
+        Configuration::deleteByName('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT');
 
         return parent::uninstall();
     }
@@ -98,8 +98,8 @@ class prestarockettheme extends Module
         return array(
             'logo' => array(
                 'url' => $svg_logo_url,
-                'width' => Configuration::get('ROCKETTHEME_LOGO_SVG_WIDTH'),
-                'height' => Configuration::get('ROCKETTHEME_LOGO_SVG_HEIGHT'),
+                'width' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_WIDTH'),
+                'height' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT'),
             ),
             'account' => array(
                 'title_account' => Configuration::get('ROCKETTHEME_ACCOUNT_TITLE'),
@@ -135,12 +135,20 @@ class prestarockettheme extends Module
         if (Configuration::get('ROCKETTHEME_ACCOUNT_FILE')) {
             $account_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_ACCOUNT_FILE')));
             $account_file .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
+            $deleteAccountFile = $this->context->link->getAdminLink('AdminModules', true, array(), array(
+                'configure' => $this->name,
+                'deleteImg' => 'ROCKETTHEME_ACCOUNT_FILE',
+            ));
         }
 
         $logo_svg = false;
         if (Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')) {
             $logo_svg = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')));
             $logo_svg .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
+            $deleteLogoSvg = $this->context->link->getAdminLink('AdminModules', true, array(), array(
+                'configure' => $this->name,
+                'deleteImg' => 'ROCKETTHEME_LOGO_SVG_FILE',
+            ));
         }
 
         $fieldsForm[0]['form'] = array(
@@ -159,7 +167,7 @@ class prestarockettheme extends Module
                     'type' => 'html',
                     'tab' => 'svg',
                     'name' => 'ROCKETTHEME_LOGO_SVG_FILE_PREVIEW',
-                    'html_content' => ($logo_svg ? '<div class="col-lg-9 col-lg-offset-3"><img src="'.$logo_svg.'" alt="ROCKETTHEME_LOGO_SVG_FILE_PREVIEW" width="200" height="auto"></div>' : ''),
+                    'html_content' => ($logo_svg ? '<div class="col-lg-9 col-lg-offset-3"><img src="'.$logo_svg.'" alt="ROCKETTHEME_LOGO_SVG_FILE_PREVIEW" width="200" height="auto"><a href="'.$deleteLogoSvg.'">'.$this->l('Supprimer').'</a></div>' : ''),
                 ),
                 'svg_file' => array(
                     'type' => 'file',
@@ -174,7 +182,7 @@ class prestarockettheme extends Module
                     'type' => 'html',
                     'name' => 'ROCKETTHEME_ACCOUNT_FILE_PREVIEW',
                     'tab' => 'account',
-                    'html_content' => ($account_file ? '<div class="col-lg-9 col-lg-offset-3"><img src="'.$account_file.'" alt="ROCKETTHEME_ACCOUNT_FILE_PREVIEW" width="200" height="auto"></div>' : ''),
+                    'html_content' => ($account_file ? '<div class="col-lg-9 col-lg-offset-3"><img src="'.$account_file.'" alt="ROCKETTHEME_ACCOUNT_FILE_PREVIEW" width="200" height="auto"><a href="'.$deleteAccountFile.'">'.$this->l('Supprimer').'</a></div>' : ''),
                 ),
                 'account_image' => array(
                     'type' => 'file',
@@ -285,6 +293,20 @@ class prestarockettheme extends Module
 
     protected function postProcess()
     {
+        if (Tools::isSubmit('deleteImg')) {
+            $img = Tools::getValue('deleteImg');
+            $image_name = Configuration::get($img);
+            if (file_exists($this->imgUploadFolder.$image_name)) {
+                unlink($this->imgUploadFolder.$image_name);
+
+                Configuration::updateValue($img, '');
+                Configuration::updateValue($img.'_WIDTH', 0);
+                Configuration::updateValue($img.'_HEIGHT', 0);
+
+                $this->html .= $this->displayConfirmation($this->l('Image deleted !'));
+            }
+        }
+
         if (Tools::isSubmit('submit'.$this->name)) {
             Configuration::updateValue('ROCKETTHEME_PRODUCT_TABS_TYPE', Tools::getValue('ROCKETTHEME_PRODUCT_TABS_TYPE'));
             Configuration::updateValue('ROCKETTHEME_ACCOUNT_TITLE', Tools::getValue('ROCKETTHEME_ACCOUNT_TITLE'));
@@ -305,7 +327,7 @@ class prestarockettheme extends Module
     {
         $errors_file_upload = array();
         $account_file = Tools::link_rewrite($this->context->shop->name).'-account-bg';
-        if (isset($_FILES['ROCKETTHEME_ACCOUNT_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error'])) {
+        if (isset($_FILES['ROCKETTHEME_ACCOUNT_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_ACCOUNT_FILE']['error'])) {
             if (!in_array($_FILES['ROCKETTHEME_ACCOUNT_FILE']['type'], array('image/jpeg', 'image/png', 'image/webm'))) {
                 $errors_file_upload[] = $this->l('Wrong! Uploaded file is not a jpg, png or webp file.');
             } elseif ($_FILES['ROCKETTHEME_ACCOUNT_FILE']['error']) {
@@ -373,8 +395,8 @@ class prestarockettheme extends Module
             }
         }
 
-        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_HEIGHT', $height);
-        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_WIDTH', $width);
+        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT', $height);
+        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE_WIDTH', $width);
     }
 
     private function getUploadErrorMessage($code)
