@@ -116,6 +116,8 @@ class prestarockettheme extends Module
             'product' => array(
                 'product_layout' => $product_layout,
             ),
+            'cccjs_version' => Configuration::get('PS_CCCJS_VERSION'),
+            'ccccss_version' => Configuration::get('PS_CCCCSS_VERSION'),
         );
     }
 
