@@ -79,18 +79,18 @@ class prestarockettheme extends Module
     public function hookActionFrontControllerSetVariables()
     {
         $account_file = false;
-        if (Configuration::get('ROCKETTHEME_ACCOUNT_FILE')) {
-            $account_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_ACCOUNT_FILE')));
-            $account_file .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
+        if (Configuration::get('ROCKETTHEME_ACCOUNT_FILE', null, null, $this->context->shop->id)) {
+            $account_file = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_ACCOUNT_FILE', null, null, $this->context->shop->id)));
+            $account_file .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE', null, null, $this->context->shop->id);
         }
 
         $svg_logo_url = false;
-        if (Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')) {
-            $svg_logo_url = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')));
-            $svg_logo_url .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
+        if (Configuration::get('ROCKETTHEME_LOGO_SVG_FILE', null, null, $this->context->shop->id)) {
+            $svg_logo_url = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_SVG_FILE', null, null, $this->context->shop->id)));
+            $svg_logo_url .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE', null, null, $this->context->shop->id);
         }
 
-        $product_layout = Configuration::get('ROCKETTHEME_PRODUCT_TABS_TYPE');
+        $product_layout = Configuration::get('ROCKETTHEME_PRODUCT_TABS_TYPE', null, null, $this->context->shop->id);
         if (!$product_layout) {
             $product_layout = 'tabs';
         }
@@ -98,26 +98,26 @@ class prestarockettheme extends Module
         return array(
             'logo' => array(
                 'url' => $svg_logo_url,
-                'width' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_WIDTH'),
-                'height' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT'),
+                'width' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_WIDTH', null, null, $this->context->shop->id),
+                'height' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT', null, null, $this->context->shop->id),
             ),
             'account' => array(
-                'title_account' => Configuration::get('ROCKETTHEME_ACCOUNT_TITLE'),
-                'description_account' => Configuration::get('ROCKETTHEME_ACCOUNT_DESCRIPTION'),
+                'title_account' => Configuration::get('ROCKETTHEME_ACCOUNT_TITLE', null, null, $this->context->shop->id),
+                'description_account' => Configuration::get('ROCKETTHEME_ACCOUNT_DESCRIPTION', null, null, $this->context->shop->id),
                 'image' => array(
                     'url' => $account_file,
-                    'width' => Configuration::get('ROCKETTHEME_ACCOUNT_FILE_WIDTH'),
-                    'height' => Configuration::get('ROCKETTHEME_ACCOUNT_FILE_HEIGHT'),
+                    'width' => Configuration::get('ROCKETTHEME_ACCOUNT_FILE_WIDTH', null, null, $this->context->shop->id),
+                    'height' => Configuration::get('ROCKETTHEME_ACCOUNT_FILE_HEIGHT', null, null, $this->context->shop->id),
                 ),
             ),
             'category' => array(
-                'category_switch' => Configuration::get('ROCKETTHEME_CATEGORY'),
+                'category_switch' => Configuration::get('ROCKETTHEME_CATEGORY', null, null, $this->context->shop->id),
             ),
             'product' => array(
                 'product_layout' => $product_layout,
             ),
-            'cccjs_version' => Configuration::get('PS_CCCJS_VERSION'),
-            'ccccss_version' => Configuration::get('PS_CCCCSS_VERSION'),
+            'cccjs_version' => Configuration::get('PS_CCCJS_VERSION', null, null, $this->context->shop->id),
+            'ccccss_version' => Configuration::get('PS_CCCCSS_VERSION', null, null, $this->context->shop->id),
         );
     }
 
