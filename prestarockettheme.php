@@ -90,6 +90,12 @@ class prestarockettheme extends Module
             $svg_logo_url .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE', null, null, $this->context->shop->id);
         }
 
+        $svg_logo_alt_url = false;
+        if (Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE', null, null, $this->context->shop->id)) {
+            $svg_logo_alt_url = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE', null, null, $this->context->shop->id)));
+            $svg_logo_alt_url .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE', null, null, $this->context->shop->id);
+        }
+
         $product_layout = Configuration::get('ROCKETTHEME_PRODUCT_TABS_TYPE', null, null, $this->context->shop->id);
         if (!$product_layout) {
             $product_layout = 'tabs';
@@ -100,6 +106,11 @@ class prestarockettheme extends Module
                 'url' => $svg_logo_url,
                 'width' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_WIDTH', null, null, $this->context->shop->id),
                 'height' => Configuration::get('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT', null, null, $this->context->shop->id),
+            ),
+            'logo_alt' => array(
+                'url' => $svg_logo_alt_url,
+                'width' => Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE_WIDTH', null, null, $this->context->shop->id),
+                'height' => Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE_HEIGHT', null, null, $this->context->shop->id),
             ),
             'account' => array(
                 'title_account' => Configuration::get('ROCKETTHEME_ACCOUNT_TITLE', null, null, $this->context->shop->id),
@@ -153,6 +164,16 @@ class prestarockettheme extends Module
             ));
         }
 
+        $logo_alt_svg = false;
+        if (Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE')) {
+            $logo_alt_svg = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE')));
+            $logo_alt_svg .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
+            $deleteLogoAltSvg = $this->context->link->getAdminLink('AdminModules', true, array(), array(
+                'configure' => $this->name,
+                'deleteImg' => 'ROCKETTHEME_LOGO_ALT_SVG_FILE',
+            ));
+        }
+
         $fieldsForm[0]['form'] = array(
             'legend' => array(
                 'title' => $this->l('Classic rocket theme configuration'),
@@ -175,6 +196,20 @@ class prestarockettheme extends Module
                     'type' => 'file',
                     'label' => $this->l('Logo SVG'),
                     'name' => 'ROCKETTHEME_LOGO_SVG_FILE',
+                    'desc' => $this->l('Upload a svg logo for your shop'),
+                    'tab' => 'svg',
+                    'required' => false,
+                ),
+                'svg_logo_alt_preview' => array(
+                    'type' => 'html',
+                    'tab' => 'svg',
+                    'name' => 'ROCKETTHEME_LOGO_ALT_SVG_FILE_PREVIEW',
+                    'html_content' => ($logo_svg ? '<div class="col-lg-9 col-lg-offset-3"><img src="'.$logo_alt_svg.'" alt="ROCKETTHEME_LOGO_ALT_SVG_FILE_PREVIEW" width="200" height="auto"><a href="'.$deleteLogoAltSvg.'">'.$this->l('Supprimer').'</a></div>' : ''),
+                ),
+                'svg_alt_file' => array(
+                    'type' => 'file',
+                    'label' => $this->l('Logo alternative SVG'),
+                    'name' => 'ROCKETTHEME_LOGO_ALT_SVG_FILE',
                     'desc' => $this->l('Upload a svg logo for your shop'),
                     'tab' => 'svg',
                     'required' => false,
@@ -316,6 +351,7 @@ class prestarockettheme extends Module
             Configuration::updateValue('ROCKETTHEME_CATEGORY', Tools::getValue('ROCKETCLASSIC_CATEGORY'));
 
             $this->uploadLogoSvg();
+            $this->uploadLogoAltSvg();
             $this->uploadAccountFile();
             Configuration::updateValue('ROCKETTHEME_UPLOAD_DATE', time());
 
@@ -367,18 +403,40 @@ class prestarockettheme extends Module
 
             if (empty($errors_svg_upload)) {
                 Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE', $logo_name);
-                $this->updateImageSize();
+                $this->updateImageSize('ROCKETTHEME_LOGO_SVG_FILE');
             } else {
                 $this->errors = array_merge($this->errors, $errors_svg_upload);
             }
         }
     }
 
-    private function updateImageSize()
+    protected function uploadLogoAltSvg()
+    {
+        $errors_svg_upload = array();
+        $logo_name = Tools::link_rewrite($this->context->shop->name).'-logo-alt.svg';
+        if (isset($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error'])) {
+            if ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['type']) {
+                $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
+            } elseif ($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error']) {
+                $errors_svg_upload[] = $this->getUploadErrorMessage($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error']);
+            } elseif (!move_uploaded_file($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['tmp_name'], $this->imgUploadFolder.$logo_name)) {
+                $errors_svg_upload[] = $this->l('Wrong! The file has not been uploaded.');
+            }
+
+            if (empty($errors_svg_upload)) {
+                Configuration::updateValue('ROCKETTHEME_LOGO_ALT_SVG_FILE', $logo_name);
+                $this->updateImageSize('ROCKETTHEME_LOGO_ALT_SVG_FILE');
+            } else {
+                $this->errors = array_merge($this->errors, $errors_svg_upload);
+            }
+        }
+    }
+
+    private function updateImageSize($var_name)
     {
         $width = false;
         $height = false;
-        $logo_name = Configuration::get('ROCKETTHEME_LOGO_SVG_FILE');
+        $logo_name = Configuration::get($var_name);
 
         $file = $this->imgUploadFolder.$logo_name;
         if ($file) {
@@ -397,8 +455,8 @@ class prestarockettheme extends Module
             }
         }
 
-        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE_HEIGHT', $height);
-        Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE_WIDTH', $width);
+        Configuration::updateValue($var_name.'_HEIGHT', $height);
+        Configuration::updateValue($var_name.'_WIDTH', $width);
     }
 
     private function getUploadErrorMessage($code)
