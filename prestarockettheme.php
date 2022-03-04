@@ -155,6 +155,7 @@ class prestarockettheme extends Module
         }
 
         $logo_svg = false;
+        $deleteLogoSvg = false;
         if (Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')) {
             $logo_svg = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_SVG_FILE')));
             $logo_svg .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
@@ -165,6 +166,7 @@ class prestarockettheme extends Module
         }
 
         $logo_alt_svg = false;
+        $deleteLogoAltSvg= false;
         if (Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE')) {
             $logo_alt_svg = $this->context->link->getMediaLink(Media::getMediaPath($this->imgUploadFolder.Configuration::get('ROCKETTHEME_LOGO_ALT_SVG_FILE')));
             $logo_alt_svg .= '?v='.Configuration::get('ROCKETTHEME_UPLOAD_DATE');
