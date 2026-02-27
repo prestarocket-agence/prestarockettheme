@@ -366,25 +366,38 @@ class prestarockettheme extends Module
     protected function uploadAccountFile()
     {
         $errors_file_upload = array();
-        $account_file = Tools::link_rewrite($this->context->shop->name).'-account-bg';
+        $account_file = Tools::str2url($this->context->shop->name).'-account-bg';
         if (isset($_FILES['ROCKETTHEME_ACCOUNT_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_ACCOUNT_FILE']['error'])) {
-            if (!in_array($_FILES['ROCKETTHEME_ACCOUNT_FILE']['type'], array('image/jpeg', 'image/png', 'image/webm'))) {
-                $errors_file_upload[] = $this->l('Wrong! Uploaded file is not a jpg, png or webp file.');
-            } elseif ($_FILES['ROCKETTHEME_ACCOUNT_FILE']['error']) {
+            // Vérifier d'abord les erreurs d'upload
+            if ($_FILES['ROCKETTHEME_ACCOUNT_FILE']['error']) {
                 $errors_file_upload[] = $this->getUploadErrorMessage($_FILES['ROCKETTHEME_ACCOUNT_FILE']['error']);
-            }
-
-            list($width, $height, $type) = getimagesize($_FILES['ROCKETTHEME_ACCOUNT_FILE']['tmp_name']);
-            $ext = image_type_to_extension($type);
-            if (!move_uploaded_file($_FILES['ROCKETTHEME_ACCOUNT_FILE']['tmp_name'], $this->imgUploadFolder.$account_file.$ext)) {
-                $errors_file_upload[] = $this->l('Wrong! The file has not been uploaded.');
-            }
-
-            if (empty($errors_file_upload)) {
-                Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE', $account_file.$ext);
-                Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE_WIDTH', $width);
-                Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE_HEIGHT', $height);
+            } elseif (!is_uploaded_file($_FILES['ROCKETTHEME_ACCOUNT_FILE']['tmp_name'])) {
+                $errors_file_upload[] = $this->l('Wrong! The uploaded file is not valid.');
+            } elseif (!in_array($_FILES['ROCKETTHEME_ACCOUNT_FILE']['type'], array('image/jpeg', 'image/png', 'image/webm'))) {
+                $errors_file_upload[] = $this->l('Wrong! Uploaded file is not a jpg, png or webp file.');
             } else {
+                // Vérifier que getimagesize peut lire le fichier
+                $image_info = @getimagesize($_FILES['ROCKETTHEME_ACCOUNT_FILE']['tmp_name']);
+                if ($image_info === false) {
+                    $errors_file_upload[] = $this->l('Wrong! Unable to read image file.');
+                } else {
+                    list($width, $height, $type) = $image_info;
+                    $ext = image_type_to_extension($type);
+                    $destination = $this->imgUploadFolder.$account_file.$ext;
+                    
+                    // Copier le fichier au lieu de le déplacer pour éviter les conflits avec Symfony
+                    // Le fichier temporaire sera nettoyé automatiquement par PHP à la fin du script
+                    if (!copy($_FILES['ROCKETTHEME_ACCOUNT_FILE']['tmp_name'], $destination)) {
+                        $errors_file_upload[] = $this->l('Wrong! The file has not been uploaded.');
+                    } else {
+                        Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE', $account_file.$ext);
+                        Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE_WIDTH', $width);
+                        Configuration::updateValue('ROCKETTHEME_ACCOUNT_FILE_HEIGHT', $height);
+                    }
+                }
+            }
+
+            if (!empty($errors_file_upload)) {
                 $this->errors = array_merge($this->errors, $errors_file_upload);
             }
         }
@@ -393,20 +406,28 @@ class prestarockettheme extends Module
     protected function uploadLogoSvg()
     {
         $errors_svg_upload = array();
-        $logo_name = Tools::link_rewrite($this->context->shop->name).'-logo.svg';
+        $logo_name = Tools::str2url($this->context->shop->name).'-logo.svg';
         if (isset($_FILES['ROCKETTHEME_LOGO_SVG_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error'])) {
-            if ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['type']) {
-                $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
-            } elseif ($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error']) {
+            // Vérifier d'abord les erreurs d'upload
+            if ($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error']) {
                 $errors_svg_upload[] = $this->getUploadErrorMessage($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['error']);
-            } elseif (!move_uploaded_file($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['tmp_name'], $this->imgUploadFolder.$logo_name)) {
-                $errors_svg_upload[] = $this->l('Wrong! The file has not been uploaded.');
+            } elseif (!is_uploaded_file($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['tmp_name'])) {
+                $errors_svg_upload[] = $this->l('Wrong! The uploaded file is not valid.');
+            } elseif ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_SVG_FILE']['type']) {
+                $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
+            } else {
+                $destination = $this->imgUploadFolder.$logo_name;
+                // Copier le fichier au lieu de le déplacer pour éviter les conflits avec Symfony
+                // Le fichier temporaire sera nettoyé automatiquement par PHP à la fin du script
+                if (!copy($_FILES['ROCKETTHEME_LOGO_SVG_FILE']['tmp_name'], $destination)) {
+                    $errors_svg_upload[] = $this->l('Wrong! The file has not been uploaded.');
+                } else {
+                    Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE', $logo_name);
+                    $this->updateImageSize('ROCKETTHEME_LOGO_SVG_FILE');
+                }
             }
 
-            if (empty($errors_svg_upload)) {
-                Configuration::updateValue('ROCKETTHEME_LOGO_SVG_FILE', $logo_name);
-                $this->updateImageSize('ROCKETTHEME_LOGO_SVG_FILE');
-            } else {
+            if (!empty($errors_svg_upload)) {
                 $this->errors = array_merge($this->errors, $errors_svg_upload);
             }
         }
@@ -415,20 +436,28 @@ class prestarockettheme extends Module
     protected function uploadLogoAltSvg()
     {
         $errors_svg_upload = array();
-        $logo_name = Tools::link_rewrite($this->context->shop->name).'-logo-alt.svg';
+        $logo_name = Tools::str2url($this->context->shop->name).'-logo-alt.svg';
         if (isset($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']) && (UPLOAD_ERR_NO_FILE !== $_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error'])) {
-            if ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['type']) {
-                $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
-            } elseif ($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error']) {
+            // Vérifier d'abord les erreurs d'upload
+            if ($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error']) {
                 $errors_svg_upload[] = $this->getUploadErrorMessage($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['error']);
-            } elseif (!move_uploaded_file($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['tmp_name'], $this->imgUploadFolder.$logo_name)) {
-                $errors_svg_upload[] = $this->l('Wrong! The file has not been uploaded.');
+            } elseif (!is_uploaded_file($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['tmp_name'])) {
+                $errors_svg_upload[] = $this->l('Wrong! The uploaded file is not valid.');
+            } elseif ('image/svg+xml' !== $_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['type']) {
+                $errors_svg_upload[] = $this->l('Wrong! Uploaded file is not a svg file.');
+            } else {
+                $destination = $this->imgUploadFolder.$logo_name;
+                // Copier le fichier au lieu de le déplacer pour éviter les conflits avec Symfony
+                // Le fichier temporaire sera nettoyé automatiquement par PHP à la fin du script
+                if (!copy($_FILES['ROCKETTHEME_LOGO_ALT_SVG_FILE']['tmp_name'], $destination)) {
+                    $errors_svg_upload[] = $this->l('Wrong! The file has not been uploaded.');
+                } else {
+                    Configuration::updateValue('ROCKETTHEME_LOGO_ALT_SVG_FILE', $logo_name);
+                    $this->updateImageSize('ROCKETTHEME_LOGO_ALT_SVG_FILE');
+                }
             }
 
-            if (empty($errors_svg_upload)) {
-                Configuration::updateValue('ROCKETTHEME_LOGO_ALT_SVG_FILE', $logo_name);
-                $this->updateImageSize('ROCKETTHEME_LOGO_ALT_SVG_FILE');
-            } else {
+            if (!empty($errors_svg_upload)) {
                 $this->errors = array_merge($this->errors, $errors_svg_upload);
             }
         }
